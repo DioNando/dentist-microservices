@@ -1,0 +1,113 @@
+version: "3.9" # Définition de la version de Docker Compose
+
+services:
+  # Base de données MySQL pour "Patient"
+  patient-mysql:
+    image: mysql:8.0
+    container_name: dentist-patient-database
+    restart: on-failure
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpatient123
+      MYSQL_DATABASE: patient-database
+      MYSQL_USER: patient
+      MYSQL_PASSWORD: patient123
+    healthcheck:
+      test: ["CMD", "mysql_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - dentist_patient_db_data:/var/lib/mysql
+    networks:
+      - dentist-network
+  patient-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: dentist-patient-phpmyadmin
+    ports:
+      - "80:80"
+    environment:
+      PMA_HOST: patient-mysql
+      MYSQL_ROOT_PASSWORD: rootpatient123
+    depends_on:
+      - patient-mysql
+    networks:
+      - dentist-network
+
+  # Base de données MySQL pour "Appointment"
+  appointment-mysql:
+    image: mysql:8.0
+    container_name: dentist-appointment-database
+    restart: on-failure
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootappointment123
+      MYSQL_DATABASE: appointment-database
+      MYSQL_USER: appointment
+      MYSQL_PASSWORD: appointment123
+    healthcheck:
+      test: ["CMD", "mysql_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - dentist_appointment_db_data:/var/lib/mysql
+    networks:
+      - dentist-network
+  appointment-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: dentist-appointment-phpmyadmin
+    ports:
+      - "81:80"
+    environment:
+      PMA_HOST: appointment-mysql
+      MYSQL_ROOT_PASSWORD: rootappointment123
+    depends_on:
+      - appointment-mysql
+    networks:
+      - dentist-network
+
+  # Base de données MySQL pour "User"
+  user-mysql:
+    image: mysql:8.0
+    container_name: dentist-user-database
+    restart: on-failure
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootuser123
+      MYSQL_DATABASE: user-database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user123
+    healthcheck:
+      test: ["CMD", "mysql_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - dentist_user_db_data:/var/lib/mysql
+    networks:
+      - dentist-network
+  user-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: dentist-user-phpmyadmin
+    ports:
+      - "82:80"
+    environment:
+      PMA_HOST: user-mysql
+      MYSQL_ROOT_PASSWORD: rootuser123
+    depends_on:
+      - user-mysql
+    networks:
+      - dentist-network
+
+volumes:
+  dentist_patient_db_data:
+  dentist_appointment_db_data:
+  dentist_user_db_data:
+
+networks:
+  dentist-network:
+    driver: bridge
